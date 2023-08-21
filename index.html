@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leitor de Código de Barras</title>
+  <script src="https://cdn.jsdelivr.net/npm/quagga"></script>
+</head>
+<body>
+  <h1>Leitor de Código de Barras</h1>
+  <button id="startButton">Iniciar Leitura</button>
+  <div id="scanner-container"></div>
+  <input type="text" id="barcodeValue" placeholder="Código de Barras lido" disabled>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const startButton = document.getElementById("startButton");
+      const scannerContainer = document.getElementById("scanner-container");
+      const barcodeValueInput = document.getElementById("barcodeValue");
+
+      // Configuração do leitor de código de barras
+      const config = {
+        inputStream: {
+          type: "LiveStream",
+          constraints: {
+            facingMode: "environment" // Usa a câmera traseira do dispositivo
+          },
+          target: scannerContainer
+        },
+        locator: {
+          patchSize: "medium",
+          halfSample: true
+        },
+        numOfWorkers: 2,
+        decoder: {
+          readers: ["ean_reader"]
+        },
+        locate: true
+      };
+
+      // Inicialização do leitor de código de barras
+      Quagga.init(config, function(err) {
+        if (err) {
+          console.error(err);
+          return;
+        }
+
+        startButton.addEventListener("click", function() {
+          Quagga.start();
+        });
+
+        // Captura do resultado do código de barras
+        Quagga.onDetected(function(result) {
+          const code = result.codeResult.code;
+          console.log("Código de barras detectado: " + code);
+          barcodeValueInput.value = code; // Exibe o valor no campo de entrada
+          Quagga.stop(); // Para a leitura após detectar um código
+        });
+      });
+    });
+  </script>
+</body>
+</html>
